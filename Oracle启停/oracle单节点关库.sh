@@ -1,6 +1,28 @@
 #!/bin/bash
 # 10.135.66.13
 
+save_pdb_state(){
+# 使用SQL*Plus从数据库检索版本信息
+version=$(sqlplus -s / as sysdba <<EOF
+SET PAGESIZE 0 FEEDBACK OFF VERIFY OFF HEADING OFF ECHO OFF;
+SELECT version FROM v\$instance;
+EXIT;
+EOF
+)
+
+# 检查版本是否支持PDB
+if [[ "$version" > "12.0" ]]
+then
+    echo "Version is $version. Save pdb state"| tee -a "$logfile"
+    sqlplus -s / as sysdba <<EOF
+    ALTER PLUGGABLE DATABASE ALL SAVE STATE;
+    EXIT;
+EOF
+else
+    echo "Version is $version. Does not support PDB."| tee -a "$logfile"
+fi
+}
+
 stop_oracle() {
 # 检查数据库状态，关闭数据库
 db_status=$(ps -ef | grep "$ORACLE_SID$" | grep -v grep | grep -i "ora_smon")
@@ -8,6 +30,7 @@ if [ -z "$db_status" ]; then
     echo "Database $ORACLE_SID already closed."| tee -a $logfile
     return
 else
+    save_pdb_state
     echo "Stopping Oracle database..."| tee -a $logfile
     sqlplus / as sysdba <<EOF
     SHUTDOWN IMMEDIATE;
@@ -68,13 +91,14 @@ fi
 source ~/.bash_profile
 
 logfile="$HOME/oracle_automation_shutdown_startup.log"
-if [ ! -f "$logfile" ] then
+if [ ! -f "$logfile" ]; then
     touch $logfile
 fi
 
+echo "automation shutdown script start at $(date)"| tee -a "$logfile"
 # 多实例检查
 # 查找所有的ora_smon进程
-processes=$(ps -ef | grep ora_smon)
+processes=$(ps -ef | grep -v grep| grep ora_smon)
 
 # 检查processes变量是否为空
 if [ -z "$processes" ]; then
