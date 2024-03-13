@@ -56,6 +56,8 @@ while true; do
     sleep 5
 done
 
+lsnrctl stop    #关监听
+
 # 检查是否还有该实例下的ora进程
 while true; do
     process_info=$(ps -ef | grep "$ORACLE_SID$" | grep -v grep | grep -i "ora_")

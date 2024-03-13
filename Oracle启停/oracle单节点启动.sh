@@ -52,6 +52,8 @@ else
 EOF
 fi
 
+lsnrctl start
+
 # alert日志检查
 while true; do
     log_content=$(tail -n 50 $ORACLE_BASE/diag/rdbms/$ORACLE_SID/$ORACLE_SID/trace/alert_$ORACLE_SID.log)
