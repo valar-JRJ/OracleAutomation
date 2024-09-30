@@ -1,5 +1,4 @@
 #!/bin/bash
-# 10.135.66.13
 
 save_pdb_state(){
 # 使用SQL*Plus从数据库检索版本信息
@@ -83,6 +82,7 @@ while true; do
 done
 }
 
+exec_ora_stop(){
 # 切换到oracle用户如果不是
 if [ "$USER" != "oracle" ]; then
     echo "Switching to oracle user..."
@@ -118,3 +118,6 @@ do
     echo "Exported ORACLE_SID for shutdown: $sid"| tee -a "$logfile"
     stop_oracle
 done
+}
+
+exec_ora_stop

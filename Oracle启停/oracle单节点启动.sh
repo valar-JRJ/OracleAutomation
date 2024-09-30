@@ -1,5 +1,4 @@
 #!/bin/bash
-# 10.135.66.13
 
 sids_retrive(){
     # 定义一个函数来从文件中获取ORACLE_SID
@@ -74,6 +73,7 @@ while true; do
 done
 }
 
+exec_ora_start(){
 # 切换到oracle用户如果不是
 if [ "$USER" != "oracle" ]; then
     echo "Switching to oracle user..."
@@ -94,3 +94,6 @@ do
     echo "Exported ORACLE_SID for startup: $sid"| tee -a $logfile
     start_oracle
 done
+}
+
+exec_ora_start
